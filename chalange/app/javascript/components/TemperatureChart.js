@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios';
 
 class TemperatureChart extends React.Component {
 	constructor(props) {
@@ -11,8 +12,8 @@ class TemperatureChart extends React.Component {
 		)
 	}
 
-	componentDidMount() {
-		Highcharts.chart('temperature_chart', {
+	buildEmptyChart() {
+		this.chart = Highcharts.chart('temperature_chart', {
 			title: {
 				text: 'Temperatures by sensor'
 			},
@@ -45,39 +46,7 @@ class TemperatureChart extends React.Component {
 				}
 			},
 
-			series: [{
-				name: 'Sensor 1',
-				data: [
-					[
-						new Date('2019-01-01T09:30:00-00:00').getTime(),
-						-27,
-					],
-					[
-						new Date('2019-01-01T09:30:25-00:00').getTime(),
-						-30,
-					],
-					[
-						new Date('2019-01-01T09:32:00-00:00').getTime(),
-						-54,
-					]
-				]
-			}, {
-				name: 'Sensor 2',
-				data: [
-					[
-						new Date('2019-01-01T09:31:00-00:00').getTime(),
-						-29,
-					],
-					[
-						new Date('2019-01-01T09:33:00-00:00').getTime(),
-						-37,
-					],
-					[
-						new Date('2019-01-01T09:33:30-00:00').getTime(),
-						-10,
-					]
-				]
-			}],
+			series: [],
 
 			responsive: {
 				rules: [{
@@ -94,6 +63,40 @@ class TemperatureChart extends React.Component {
 				}]
 			}
 		});
+	}
+
+	updateChartSeries(series) {
+		while(this.chart.series.length > 0) {
+			this.chart.series[0].remove();
+		}
+
+		for (var i = series.length - 1; i >= 0; i--) {
+			series[i].zones = [
+				{
+					value: series[i].min,
+					color: 'blue',
+				},
+				{
+					value: series[i].max,
+				},
+				{
+					color: 'red'
+				}
+			];
+
+			this.chart.addSeries(series[i]);
+		}
+	}
+
+	componentDidMount() {
+		this.buildEmptyChart();
+
+		axios
+			.get('/chart_data.json')
+			.then(res => {
+				this.updateChartSeries(res.data);
+			})
+		;
 	}
 }
 

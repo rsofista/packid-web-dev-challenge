@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  resources :records
+  resources :sensors
 	root 'temperatures_chart#index'
-	get '/temperatures_chart', to: 'temperatures_chart#index'
+	get '/chart_data', to: 'temperatures_chart#chart_data'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
